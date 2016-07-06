@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+    body {
+      font-family: Helvetica;
+    }
+    tr {
+      margin:20px;
+    }
+    tr.ok {
+      color: #fff;
+      background-color:#5DBF61;
+    }
+    tr.ko {
+      background-color:#FA8258;
+    }
+    </style>
+    <base target="_top">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
+    <script>
+      function classe(etat) {
+        return etat == "200" ? "ok" : "ko";
+      }
+      function onSuccess(numUnread) {
+        $("#output").html('');
+        $.each(numUnread, function(index, serveur) {
+          $("#tbody").append("<tr class='" + classe(serveur.etat) + "'><td>" + serveur.projet + "</td><td>" + serveur.environnement + "</td><td><a href='" + serveur.url + "' target='_blank'>" + serveur.url + "</a></td><td>" + serveur.etat + "</td></tr>");
+        });
+        $("#lesserveurs").show();
+        laDate = (new Date()).toLocaleString().replace(/:/g,'h');
+        $("#laDate").html(" au " + laDate.substring(0, laDate.length-3));
+        $("#footer").html("<br />" +
+        "<a href='https://docs.google.com/spreadsheets/d/SON-ID-UNIQUE/' target='_blank'>" +
+        "<img width='100' src='https://lh3.ggpht.com/e3oZddUHSC6EcnxC80rl_6HbY94sM63dn6KrEXJ-C4GIUN-t1XM0uYA_WUwyhbIHmVMH=w300' />" +
+        "</a>");
+      }
+      google.script.run.withSuccessHandler(onSuccess).rafraichir();
+    </script>
+  </head>
+  <body>
+    <div id="output">Appel des serveurs en cours...&nbsp;
+      <img width="100" src='https://mir-s3-cdn-cf.behance.net/project_modules/disp/585d0331234507.564a1d239ac5e.gif' alt="Chargement..."/>
+    </div>
+    <table id="lesserveurs" style="display: none;">
+    <thead>
+    <tr>
+    <th>Projet</th>
+    <th>Environnement</th>
+    <th>URL</th>
+    <th>État<span id="laDate"></span></th>
+    </tr>
+    </thead>
+    <tbody id="tbody">
+    </tbody>
+    </table>
+    <div id="footer"></div>
+  </body>
+</html>
