@@ -27,3 +27,11 @@ function onEdit(e){
 function fonctionInvisibleTerminantParLeTiretDu8_(booleen) {
   // Faire quelque chose ici suivant la valeur du parametre booleen.
 }
+
+function supprimerLignesRapport() {
+  // Effacement des donnees du rapport
+  var entete = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
+  entete.activate();
+  if(entete.getMaxRows() >= 36)
+    entete.deleteRows(36, entete.getMaxRows() - 35);
+}
