@@ -12,3 +12,18 @@ function onOpen() {
   ];
   spreadsheet.addMenu('Libellé du menu', menuItems);
 }
+
+/**
+ * Fonction executee a chaque changement de cellule
+ */
+function onEdit(e){
+  var range = e.range; // la cellule modifiée
+  //range.setNote('Change type : ' + e.changeType.length);
+  if(range.getColumn() == 6) {
+    fonctionInvisibleTerminantParLeTiretDu8_(range.getValue() == "Du texte");
+  }
+}
+
+function fonctionInvisibleTerminantParLeTiretDu8_(booleen) {
+  // Faire quelque chose ici suivant la valeur du parametre booleen.
+}
