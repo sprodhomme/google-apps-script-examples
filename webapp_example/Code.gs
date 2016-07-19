@@ -1,17 +1,10 @@
-var REQUEST_CODES = {
-  "200" : "Réponse OK - le serveur répond correctement.",
-  "405" : "Fonction appelée non acceptée par le serveur.",
-  "404" : "Not found - l'url pointe sur un élément inexistant ou dont la redirection n'a pas été paramétrée sur le serveur.",
-  "500" : "Erreur serveur - probablement un NullPointerException côté back, ou autre Exception bloquante."
-}
-
 /**
  * Special function that handles HTTP GET requests to the published web app.
  * @return {HtmlOutput} The HTML page to be served.
  */
 function doGet() {
   return HtmlService.createTemplateFromFile('Page').evaluate()
-      .setTitle('LE TITRE QUI VA BIEN')
+      .setTitle('MONITORING DES SERVEURS SANTECH')
       .setSandboxMode(HtmlService.SandboxMode.IFRAME);
 }
 
@@ -22,10 +15,25 @@ function getUnreadEmails() {
 
 function onOpen() {
   SpreadsheetApp.getUi() // Or DocumentApp or FormApp.
-      .createMenu('MENU AJOUTE')
+      .createMenu('MONITORING')
       .addItem('Rafraîchir', 'rafraichir')
       .addItem('Programmer tous les jours pour 9:00', 'programmer')
       .addToUi();
+}
+
+function enregistrerHTMLCodes_() {
+  fichier = SpreadsheetApp.openById("1pKavdCFP6qQJXkiSJorC-Qom7PwXU8KlAOX4eqDrA4I");
+  SpreadsheetApp.setActiveSpreadsheet(fichier); // !!! obligatoire pour qu'il ne soit pas null !!!
+  feuille = fichier.getSheetByName("DATA");
+  REQUEST_CODES = {};
+  for (index = 2; index <= feuille.getMaxRows(); index++) {
+    //Logger.log(index);
+    //Logger.log(feuille.getRange(index, 1).getValue()); // code HTML
+    //Logger.log(feuille.getRange(index, 3).getValue()); // signification du code HTML
+    REQUEST_CODES[feuille.getRange(index, 1).getValue()] = feuille.getRange(index, 3).getValue();
+  }
+  //  Logger.log(REQUEST_CODES);
+  return REQUEST_CODES;
 }
 
 function programmer() {
@@ -34,7 +42,7 @@ function programmer() {
 //      .everyDay()
 //      .atHour(9)
 //      .create();
-  
+
   ScriptApp.newTrigger('rafraichir')
       .timeBased()
       .onWeekDay(ScriptApp.WeekDay.MONDAY)
@@ -47,13 +55,14 @@ function programmer() {
 }
 
 function rafraichir() {
-  var fichier = SpreadsheetApp.openById("ID-UNIQUE-DU-FICHIER-GG-SHEETS");
+  var REQUEST_CODES = enregistrerHTMLCodes_();
+  var fichier = SpreadsheetApp.openById("1pKavdCFP6qQJXkiSJorC-Qom7PwXU8KlAOX4eqDrA4I");
   SpreadsheetApp.setActiveSpreadsheet(fichier); // !!! obligatoire pour qu'il ne soit pas null !!!
-  var feuille = fichier.getSheetByName("NOM_ONGLET");
+  var feuille = fichier.getSheetByName("SERVEURS");
   feuille.getRange("D2:D").clear().clearNote().setFontColor("black");
   var nbLignes = feuille.getLastRow();
   erreurs = [];
-  
+
   /*
   Format : {"projet", "environnement", "url", "etat"}
   */
@@ -73,15 +82,15 @@ function rafraichir() {
       erreur = feuille.getRange("D" + index).getValue();
       erreurs.push({"projet" : projet, "environnement" : environnement, "erreur" : erreur});
     }
-    resultats.push({"projet":projet,"environnement":environnement,"url":url,"etat":"" + reponse});
+    resultats.push({"projet":projet,"environnement":environnement,"url":url,"etat":"" + reponse,"message":REQUEST_CODES[reponse]});
   }
   if(erreurs.length > 0) {
     envoyerEmailErreurs_(erreurs);
   }
   laDate = new Date();
   laDate = laDate.toLocaleString();
-  feuille.getRange("D1").setValue("Etat au " + laDate.substring(0, laDate.length-8));
-  Logger.log(resultats);
+  feuille.getRange("D1").setValue("État au " + laDate.substring(0, laDate.length-8));
+  //Logger.log(resultats);
   return resultats;
 }
 
@@ -90,6 +99,7 @@ function getStateFromUrl_(url) {
     response = UrlFetchApp.fetch(url, {"muteHttpExceptions" : true, "User-Agent" : "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2"});
     return response.getResponseCode();
   } catch(e) {
+    Logger.log(e);
     return e;
   }
 }
@@ -108,4 +118,10 @@ function envoyerEmailErreurs_(erreurs) {
     contenu += "\n ";
   }
   MailApp.sendEmail(destinataire, objet, contenu);
+}
+
+function analyserLigne_(ligne) {
+  var statut = "";
+
+  return statut;
 }

@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html>
-  <head>
+    <head>
+      <link href="https://fonts.googleapis.com/css?family=Metrophobic" rel="stylesheet">
     <style>
     body {
-      font-family: Helvetica;
+      font-family: 'Metrophobic', sans-serif;
     }
-    tr {
+    td {
       margin:20px;
     }
     tr.ok {
@@ -14,6 +15,9 @@
     }
     tr.ko {
       background-color:#FA8258;
+    }
+    img:hover {
+      background-color: #eee;
     }
     </style>
     <base target="_top">
@@ -25,22 +29,33 @@
       function onSuccess(numUnread) {
         $("#output").html('');
         $.each(numUnread, function(index, serveur) {
-          $("#tbody").append("<tr class='" + classe(serveur.etat) + "'><td>" + serveur.projet + "</td><td>" + serveur.environnement + "</td><td><a href='" + serveur.url + "' target='_blank'>" + serveur.url + "</a></td><td>" + serveur.etat + "</td></tr>");
+          //console.log(serveur);
+          $("#tbody").append("<tr class='" + classe(serveur.etat) + "'><td>" + serveur.projet + "</td><td>" + serveur.environnement + "</td><td><a href='" + serveur.url + "' target='_blank'>" + serveur.url + "</a></td><td title='" + serveur.message + "'>" + serveur.etat + "</td></tr>");
         });
         $("#lesserveurs").show();
         laDate = (new Date()).toLocaleString().replace(/:/g,'h');
         $("#laDate").html(" au " + laDate.substring(0, laDate.length-3));
         $("#footer").html("<br />" +
-        "<a href='https://docs.google.com/spreadsheets/d/SON-ID-UNIQUE/' target='_blank'>" +
+        "<a href='https://docs.google.com/spreadsheets/d/1pKavdCFP6qQJXkiSJorC-Qom7PwXU8KlAOX4eqDrA4I/' target='_blank'>" +
         "<img width='100' src='https://lh3.ggpht.com/e3oZddUHSC6EcnxC80rl_6HbY94sM63dn6KrEXJ-C4GIUN-t1XM0uYA_WUwyhbIHmVMH=w300' />" +
         "</a>");
       }
       google.script.run.withSuccessHandler(onSuccess).rafraichir();
+      function croissantage() {
+        window.location.href="mailto:" +
+        "mjoly@santech.fr,sprodhomme@santech.fr,jvu@santech.fr,bschom@santech.fr,tballa@santech.fr,mleroy@santech.fr,ygrandperret@santech.fr,ndelangle@santech.fr,tngo@santech.fr,ecao@santech.fr" +
+        "?subject=Croissants&body=Je ramène les croissants demain matin !\
+        Pour rappel, WIN + L verrouille la session sous Windows.";
+      }
     </script>
   </head>
+  <!--<body onclick="window.open('https://mail.google.com/mail/u/0/?view=cm&fs=1&tf=1&to=mjoly@santech.fr,sprodhomme@santech.fr,jvu@santech.fr,bschom@santech.fr,tballa@santech.fr,mleroy@santech.fr,ygrandperret@santech.fr,ndelangle@santech.fr,tngo@santech.fr,ecao@santech.fr');">-->
+  <!--<body onclick="croissantage();">-->
   <body>
     <div id="output">Appel des serveurs en cours...&nbsp;
-      <img width="100" src='https://mir-s3-cdn-cf.behance.net/project_modules/disp/585d0331234507.564a1d239ac5e.gif' alt="Chargement..."/>
+      <a href='https://mail.google.com/mail/u/0/?view=cm&fs=1&tf=1&to=mjoly@santech.fr,sprodhomme@santech.fr,jvu@santech.fr,bschom@santech.fr,tballa@santech.fr,mleroy@santech.fr,ygrandperret@santech.fr,ndelangle@santech.fr,tngo@santech.fr,ecao@santech.fr' target='_blank'>
+        <img width="100" src='https://mir-s3-cdn-cf.behance.net/project_modules/disp/585d0331234507.564a1d239ac5e.gif' alt="Chargement..."/>
+      </a>
     </div>
     <table id="lesserveurs" style="display: none;">
     <thead>
@@ -48,7 +63,7 @@
     <th>Projet</th>
     <th>Environnement</th>
     <th>URL</th>
-    <th>�tat<span id="laDate"></span></th>
+    <th>État<span id="laDate"></span></th>
     </tr>
     </thead>
     <tbody id="tbody">

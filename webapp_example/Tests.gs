@@ -12,7 +12,7 @@ function toutTester() {
 }
 
 function testerJson() {
-  data = {"id" : "123", "name" : "Objet avec ce contenu"};
+  data = {"id" : "123", "name" : "Objet en mousse"};
   string = JSON.stringify(data)
   Logger.log(string);
   Logger.log(JSON.parse(string));
@@ -44,7 +44,7 @@ function testerShowTriggerIDs() {
   for(index = 0; index < allTriggers.length; index ++) {
     Logger.log(allTriggers[index].getUniqueId());
   }
-  Logger.log(allTriggers.length + " Trigger" + isMultiple_(allTriggers.length) + " présent" + isMultiple_(allTriggers.length) + ".");
+  Logger.log(allTriggers.length + " Trigger" + isMultiple_(allTriggers.length) + " prÃ©sent" + isMultiple_(allTriggers.length) + ".");
 }
 
 function testerDeleteAllTriggers() {
@@ -53,7 +53,7 @@ function testerDeleteAllTriggers() {
     Logger.log(allTriggers[index].getUniqueId());
     ScriptApp.deleteTrigger(allTriggers[index]);
   }
-  Logger.log(allTriggers.length + " Trigger" + isMultiple_(allTriggers.length) + " supprimé" + isMultiple_(allTriggers.length) + ".");
+  Logger.log(allTriggers.length + " Trigger" + isMultiple_(allTriggers.length) + " supprimÃ©" + isMultiple_(allTriggers.length) + ".");
 }
 
 function isMultiple_(nombre) {
@@ -101,9 +101,9 @@ function testerGoogle() {
 }
 
 function testerExceptionHandling() {
-  url = "https://www.example.com";
+  url = "https://www.vivrechezmoi.com";
   Logger.log(url + " : " + getStateFromUrl_(url));
-  url = "https://www.exemplefaux.com";
+  url = "https://www.vivrecheztoi.com";
   Logger.log(url + " : " + getStateFromUrl_(url));
 }
 
@@ -140,7 +140,7 @@ function testerQwantAPI() {
 }
 
 function testerAPIAvecUserAgent() {
-  url = "https://api.qwant.com/egp/search/web?count=5&q=google+apps+script?id=&offset=10";
+  url = "https://api.qwant.com/egp/search/web?count=5&q=google+app+script?id=&offset=10";
   try {
     response = UrlFetchApp.fetch(url, {"muteHttpExceptions" : true, "User-Agent" : "Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.4; en-US; rv:1.9.2.2) Gecko/20100316 Firefox/3.6.2"});
     Logger.log(response.getAllHeaders());
