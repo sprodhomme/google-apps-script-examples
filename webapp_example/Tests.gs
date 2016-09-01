@@ -151,3 +151,37 @@ function testerAPIAvecUserAgent() {
     Logger.log(e);
   }
 }
+
+function testerAnalyserLigne() {
+  row = 3; // Premiere ligne : 2
+  Logger.log(row + " : " + JSON.stringify( analyserLigne(row) ) );
+}
+
+function testerGetMaxLines() {
+  Logger.log(getMaxLines());
+}
+
+function testerEval() {
+  str = 'x=2';
+  Logger.log(eval(str));
+  Logger.log(eval('x=3;x*2'));
+}
+
+function testerEnvoiEmailASoi() {
+    /*
+  Format : {projet, environnement, erreur}
+  */
+  erreurs = [{"projet":"MYP", "environnement":"PREPROD", "erreur":"Accès impossible à l'environnement"}];
+  
+  objet = "ALERTE - Serveur(s) non disponible(s)";
+  destinataire = Session.getActiveUser().getEmail();
+  Logger.log(destinataire);
+  contenu = "Une ou plusieurs erreurs se sont produites le " + (new Date()).toLocaleString() + " :\n";
+  for(index = 0; index < erreurs.length; index++) {
+    contenu += "\n projet : " + erreurs[index].projet;
+    contenu += "\n environnement : " + erreurs[index].environnement;
+    contenu += "\n erreur : " + erreurs[index].erreur;
+    contenu += "\n ";
+  }
+  MailApp.sendEmail(destinataire, objet, contenu);
+}

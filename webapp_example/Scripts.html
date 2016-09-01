@@ -1,0 +1,71 @@
+    <script>
+      function classe(etat) {
+        return etat == "200" ? "success" : "danger";
+      }
+      
+      var PROJETS = [];
+    
+      function projetConnu(projet) {
+        return PROJETS.join(";").search(projet) !== -1;
+      }
+
+      function onSuccessOnce(serveur) {
+        if(!projetConnu(serveur.projet)) {
+          PROJETS.push(serveur.projet);
+          $("#serveurs").append("<div class='col-sm-6 col-md-4 col-lg-3 alert alert-success' id='" + serveur.projet + "'>"
+          + "<h3>" + serveur.projet + "</h3>"
+          + "<div class='table-responsive'><table class='table' id='table-" + serveur.projet + "'>"
+          + "</table></div>"
+          + "</div>");
+        }
+        
+        $("#table-" + serveur.projet).append("<tr id='tr" + serveur.id + "' class='" + classe(serveur.etat) + "'>"
+        + ligneHtml(serveur)
+        + "</tr>");
+        $("#serveurs").show();
+        laDate = (new Date()).toLocaleString().replace(/:/g,'h');
+        $("#laDate").html(" au " + laDate.substring(0, laDate.length-3));
+        $("#footer").html("<br/>" +
+        "<a href='https://docs.google.com/spreadsheets/d/1pKavdCFP6qQJXkiSJorC-Qom7PwXU8KlAOX4eqDrA4I/' target='_blank'>" +
+        "<img width='100' src='https://lh3.ggpht.com/e3oZddUHSC6EcnxC80rl_6HbY94sM63dn6KrEXJ-C4GIUN-t1XM0uYA_WUwyhbIHmVMH=w300' />" +
+        "</a>");
+        $("#nombre").html(parseInt($("#nombre").html()) + 1);
+        if(parseInt($("#nombre").html()) == parseInt($("#total").html()))
+          $("#output").hide();
+      }
+      
+      function ligneHtml(serveur) {
+        return "<td><a href='" + serveur.url + "' target='_blank'>" + serveur.environnement + "</a></td><td title='" + serveur.message + "'>" + serveur.etat + "</td>"
+        + "<td>" + "<img onclick='rafraichirServeur(this, " + serveur.id + ");' style='cursor:pointer;'src='https://upload.wikimedia.org/wikipedia/commons/b/bc/Refresh_icon.png' width='20' alt='Rafraîchir' />"
+        + "</td>";
+      }
+      
+      function rafraichirServeur(_this, id) {
+        $("tr[id=tr" + id + "]").addClass("warning");
+        google.script.run.withSuccessHandler(onSuccessRefresh).analyserLigne(id);
+      }
+      
+      function onSuccessRefresh(serveur) {
+        $("#tr" + serveur.id).removeClass("warning").removeClass("success").removeClass("danger");
+        $("#tr" + serveur.id).html(ligneHtml(serveur));
+        $("#tr" + serveur.id).addClass("bg-" + classe(serveur.etat));
+        laDate = (new Date()).toLocaleString().replace(/:/g,'h');
+        $("#laDate").html(" au " + laDate.substring(0, laDate.length-3));
+      }
+      
+      google.script.run.withSuccessHandler(function(maxRows) {
+        $("#total").html(maxRows-1);
+        for(var row=2; row<=maxRows; row++) {
+          google.script.run.withSuccessHandler(onSuccessOnce).withFailureHandler(function(e) {
+            console.log(e);
+          }).analyserLigne(row);
+        }
+      }).getMaxLines();
+
+      function croissantage() {
+        window.location.href="mailto:" +
+        "santech_int@santech.fr,santech_ext@santech.fr" +
+        "?subject=Croissants&body=Je ramène les croissants demain matin !\
+        Pour rappel, WIN + L verrouille la session sous Windows.";
+      }
+    </script>

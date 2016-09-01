@@ -1,74 +1,43 @@
 <!DOCTYPE html>
 <html>
-    <head>
-      <link href="https://fonts.googleapis.com/css?family=Metrophobic" rel="stylesheet">
-    <style>
-    body {
-      font-family: 'Metrophobic', sans-serif;
-    }
-    td {
-      margin:20px;
-    }
-    tr.ok {
-      color: #fff;
-      background-color:#5DBF61;
-    }
-    tr.ko {
-      background-color:#FA8258;
-    }
-    img:hover {
-      background-color: #eee;
-    }
-    </style>
+  <head>
+    <link href="https://fonts.googleapis.com/css?family=Metrophobic" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <base target="_top">
+    <?!= include('Stylesheets'); ?>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.2/jquery.min.js"></script>
-    <script>
-      function classe(etat) {
-        return etat == "200" ? "ok" : "ko";
-      }
-      function onSuccess(numUnread) {
-        $("#output").html('');
-        $.each(numUnread, function(index, serveur) {
-          //console.log(serveur);
-          $("#tbody").append("<tr class='" + classe(serveur.etat) + "'><td>" + serveur.projet + "</td><td>" + serveur.environnement + "</td><td><a href='" + serveur.url + "' target='_blank'>" + serveur.url + "</a></td><td title='" + serveur.message + "'>" + serveur.etat + "</td></tr>");
-        });
-        $("#lesserveurs").show();
-        laDate = (new Date()).toLocaleString().replace(/:/g,'h');
-        $("#laDate").html(" au " + laDate.substring(0, laDate.length-3));
-        $("#footer").html("<br />" +
-        "<a href='https://docs.google.com/spreadsheets/d/1pKavdCFP6qQJXkiSJorC-Qom7PwXU8KlAOX4eqDrA4I/' target='_blank'>" +
-        "<img width='100' src='https://lh3.ggpht.com/e3oZddUHSC6EcnxC80rl_6HbY94sM63dn6KrEXJ-C4GIUN-t1XM0uYA_WUwyhbIHmVMH=w300' />" +
-        "</a>");
-      }
-      google.script.run.withSuccessHandler(onSuccess).rafraichir();
-      function croissantage() {
-        window.location.href="mailto:" +
-        "mjoly@santech.fr,sprodhomme@santech.fr,jvu@santech.fr,bschom@santech.fr,tballa@santech.fr,mleroy@santech.fr,ygrandperret@santech.fr,ndelangle@santech.fr,tngo@santech.fr,ecao@santech.fr" +
-        "?subject=Croissants&body=Je ramène les croissants demain matin !\
-        Pour rappel, WIN + L verrouille la session sous Windows.";
-      }
-    </script>
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <!-- Latest compiled and minified JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
   </head>
-  <!--<body onclick="window.open('https://mail.google.com/mail/u/0/?view=cm&fs=1&tf=1&to=mjoly@santech.fr,sprodhomme@santech.fr,jvu@santech.fr,bschom@santech.fr,tballa@santech.fr,mleroy@santech.fr,ygrandperret@santech.fr,ndelangle@santech.fr,tngo@santech.fr,ecao@santech.fr');">-->
-  <!--<body onclick="croissantage();">-->
   <body>
-    <div id="output">Appel des serveurs en cours...&nbsp;
-      <a href='https://mail.google.com/mail/u/0/?view=cm&fs=1&tf=1&to=mjoly@santech.fr,sprodhomme@santech.fr,jvu@santech.fr,bschom@santech.fr,tballa@santech.fr,mleroy@santech.fr,ygrandperret@santech.fr,ndelangle@santech.fr,tngo@santech.fr,ecao@santech.fr' target='_blank'>
-        <img width="100" src='https://mir-s3-cdn-cf.behance.net/project_modules/disp/585d0331234507.564a1d239ac5e.gif' alt="Chargement..."/>
-      </a>
+    <div class="container">
+      <div class="row">
+        <h3 align="center">Monitoring des serveurs</h3>
+      </div>
+      <div class="row">
+        <p id="output">Appel des serveurs en cours...&nbsp;
+          <a href='https://mail.google.com/mail/u/0/?view=cm&fs=1&tf=1&to=santech_int@santech.fr,santech_ext@santech.fr' target='_blank'>
+            <img width="50" src='https://mir-s3-cdn-cf.behance.net/project_modules/disp/585d0331234507.564a1d239ac5e.gif' alt="Chargement..."/>
+          </a>
+        </p>
+      </div>
+      <div class="row">
+        <div id="serveurs">
+        <!-- Emplacement des résultats de monitoring des serveurs -->
+        </div>
+      </div>
+      <div class="row">
+        <span id="nombre">0</span> élément(s) sur <span id="total">0</span>
+        <br>
+        <div id="footer"></div>
+      </div>
     </div>
-    <table id="lesserveurs" style="display: none;">
-    <thead>
-    <tr>
-    <th>Projet</th>
-    <th>Environnement</th>
-    <th>URL</th>
-    <th>État<span id="laDate"></span></th>
-    </tr>
-    </thead>
-    <tbody id="tbody">
-    </tbody>
-    </table>
-    <div id="footer"></div>
+    
+    <hr>
+    <?!= include('Scripts'); ?>   
   </body>
 </html>

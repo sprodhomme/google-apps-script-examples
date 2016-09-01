@@ -2,15 +2,15 @@
  * Special function that handles HTTP GET requests to the published web app.
  * @return {HtmlOutput} The HTML page to be served.
  */
-function doGet() {
+function doGet(arguments) {
+  Logger.log(arguments.parameters);
   return HtmlService.createTemplateFromFile('Page').evaluate()
-      .setTitle('MONITORING DES SERVEURS SANTECH')
-      .setSandboxMode(HtmlService.SandboxMode.IFRAME);
+      .setTitle('MONITORING DES SERVEURS SANTECH');
+//      .setSandboxMode(HtmlService.SandboxMode.IFRAME);
 }
 
-function getUnreadEmails() {
-  //return GmailApp.getInboxUnreadCount();
-  return {"id" : "123", "name" : "Utilisateur"};
+function include(filename) {
+  return HtmlService.createHtmlOutputFromFile(filename).getContent();
 }
 
 function onOpen() {
@@ -27,22 +27,19 @@ function enregistrerHTMLCodes_() {
   feuille = fichier.getSheetByName("DATA");
   REQUEST_CODES = {};
   for (index = 2; index <= feuille.getMaxRows(); index++) {
-    //Logger.log(index);
-    //Logger.log(feuille.getRange(index, 1).getValue()); // code HTML
-    //Logger.log(feuille.getRange(index, 3).getValue()); // signification du code HTML
     REQUEST_CODES[feuille.getRange(index, 1).getValue()] = feuille.getRange(index, 3).getValue();
   }
-  //  Logger.log(REQUEST_CODES);
   return REQUEST_CODES;
 }
 
-function programmer() {
-//  ScriptApp.newTrigger('rafraichir')
-//      .timeBased()
-//      .everyDay()
-//      .atHour(9)
-//      .create();
+function getMaxLines() {
+  var fichier = SpreadsheetApp.openById("1pKavdCFP6qQJXkiSJorC-Qom7PwXU8KlAOX4eqDrA4I");
+  SpreadsheetApp.setActiveSpreadsheet(fichier); // !!! obligatoire pour qu'il ne soit pas null !!!
+  var feuille = fichier.getSheetByName("SERVEURS");
+  return(feuille.getLastRow());
+}
 
+function programmer() {
   ScriptApp.newTrigger('rafraichir')
       .timeBased()
       .onWeekDay(ScriptApp.WeekDay.MONDAY)
@@ -54,6 +51,36 @@ function programmer() {
       .create();
 }
 
+function analyserLigne(row) {
+  var REQUEST_CODES = enregistrerHTMLCodes_();
+  var fichier = SpreadsheetApp.openById("1pKavdCFP6qQJXkiSJorC-Qom7PwXU8KlAOX4eqDrA4I");
+  SpreadsheetApp.setActiveSpreadsheet(fichier); // !!! obligatoire pour qu'il ne soit pas null !!!
+  var feuille = fichier.getSheetByName("SERVEURS");
+  feuille.getRange("D" + row).clear().clearNote().setFontColor("black");
+  var nbLignes = feuille.getLastRow();
+  erreurs = [];
+  /*
+  Format : {"projet", "environnement", "url", "etat"}
+  */
+  var resultat = [];
+   
+  feuille.getRange("D" + row).setValue("Appel en cours...");
+  environnement = feuille.getRange("B" + row).getValue();
+  projet = feuille.getRange("A" + row).getValue();
+  url = feuille.getRange("C" + row).getValue();
+  reponse = getStateFromUrl_(url);
+  feuille.getRange("D" + row).setValue(reponse).setComment(REQUEST_CODES[reponse]);
+  if(reponse == 200) {
+    feuille.getRange("D" + row).setBackground("#5DBF61").setFontColor("white");
+  }
+  else {
+    feuille.getRange("D" + row).setBackground("#f00");
+    erreur = feuille.getRange("D" + row).getValue();
+    erreurs.push({"projet" : projet, "environnement" : environnement, "erreur" : erreur});
+  }
+  return ({"id":row, "projet":projet,"environnement":environnement,"url":url,"etat":"" + reponse,"message":REQUEST_CODES[reponse]});
+}
+
 function rafraichir() {
   var REQUEST_CODES = enregistrerHTMLCodes_();
   var fichier = SpreadsheetApp.openById("1pKavdCFP6qQJXkiSJorC-Qom7PwXU8KlAOX4eqDrA4I");
@@ -62,7 +89,7 @@ function rafraichir() {
   feuille.getRange("D2:D").clear().clearNote().setFontColor("black");
   var nbLignes = feuille.getLastRow();
   erreurs = [];
-
+  
   /*
   Format : {"projet", "environnement", "url", "etat"}
   */
@@ -80,7 +107,7 @@ function rafraichir() {
     else {
       feuille.getRange("D" + index).setBackground("#f00");
       erreur = feuille.getRange("D" + index).getValue();
-      erreurs.push({"projet" : projet, "environnement" : environnement, "erreur" : erreur});
+      erreurs.push({"projet" : projet, "environnement" : environnement, "url":url, "erreur" : erreur});
     }
     resultats.push({"projet":projet,"environnement":environnement,"url":url,"etat":"" + reponse,"message":REQUEST_CODES[reponse]});
   }
@@ -90,7 +117,6 @@ function rafraichir() {
   laDate = new Date();
   laDate = laDate.toLocaleString();
   feuille.getRange("D1").setValue("État au " + laDate.substring(0, laDate.length-8));
-  //Logger.log(resultats);
   return resultats;
 }
 
@@ -106,22 +132,17 @@ function getStateFromUrl_(url) {
 
 function envoyerEmailErreurs_(erreurs) {
   /*
-  Format : {projet, environnement, erreur}
+  Format : {projet, environnement, url, erreur}
   */
   objet = "ALERTE - Serveur(s) non disponible(s)";
-  destinataire = "sprodhomme@santech.fr";
+  destinataire = Session.getActiveUser().getEmail();
   contenu = "Une ou plusieurs erreurs se sont produites le " + (new Date()).toLocaleString() + " :\n";
   for(index = 0; index < erreurs.length; index++) {
     contenu += "\n projet : " + erreurs[index].projet;
     contenu += "\n environnement : " + erreurs[index].environnement;
+    contenu += "\n url : " + erreurs[index].url;
     contenu += "\n erreur : " + erreurs[index].erreur;
     contenu += "\n ";
   }
   MailApp.sendEmail(destinataire, objet, contenu);
-}
-
-function analyserLigne_(ligne) {
-  var statut = "";
-
-  return statut;
 }
